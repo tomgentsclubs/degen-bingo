@@ -434,9 +434,14 @@
     [0,6,12,18,24],[4,8,12,16,20]
   ];
 
-  const marked     = new Array(25).fill(false);
+  const STORAGE_KEY = 'degen-bingo-marked';
+
+  /* Load saved state from localStorage, fall back to all-false */
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) {}
+  const marked     = Array.from({ length: 25 }, (_, i) => !!saved[i]);
   let pendingIndex = null;
-  let bingoShown   = false;
+  let bingoShown   = LINES.some(line => line.every(i => marked[i]));
 
   const grid         = document.getElementById('bingoGrid');
   const markModal    = document.getElementById('markModal');
@@ -446,6 +451,10 @@
   const unmarkTask   = document.getElementById('unmarkTask');
   const bingoBanner  = document.getElementById('bingoBanner');
   const scoreCount   = document.getElementById('scoreCount');
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(marked)); } catch(e) {}
+  }
 
   /* Build grid */
   CELLS.forEach(({ text, cls }, i) => {
@@ -461,14 +470,17 @@
       </div>`;
     div.addEventListener('click', () => onCellClick(i));
     grid.appendChild(div);
+    /* Restore marked state visually */
+    if (marked[i]) div.classList.add('marked');
   });
+
+  updateScore();
 
   function getCells() { return grid.querySelectorAll('.cell'); }
 
   function onCellClick(i) {
     pendingIndex = i;
     if (marked[i]) {
-      // Already marked — offer to undo
       unmarkTask.textContent = CELLS[i].text;
       unmarkModal.classList.add('active');
     } else {
@@ -491,6 +503,7 @@
     marked[i] = true;
     getCells()[i].classList.add('marked');
     updateScore();
+    saveState();
     checkBingo();
   }
 
@@ -508,7 +521,7 @@
     marked[i] = false;
     getCells()[i].classList.remove('marked');
     updateScore();
-    // Allow bingo to re-trigger after undo
+    saveState();
     bingoShown = LINES.some(line => line.every(j => marked[j]));
   }
 
@@ -537,6 +550,7 @@
     bingoShown = false;
     getCells().forEach(el => el.classList.remove('marked'));
     updateScore();
+    saveState();
     resetModal.classList.remove('active');
   });
   document.getElementById('resetNo').addEventListener('click', () => resetModal.classList.remove('active'));
