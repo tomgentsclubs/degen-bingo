@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Discord Nerd Bar Crawl Bingo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rainbow-1: #FF0018;
+    --rainbow-2: #FF8A00;
+    --rainbow-3: #FFD700;
+    --rainbow-4: #00C853;
+    --rainbow-5: #0066FF;
+    --rainbow-6: #8B00FF;
+    --bg: #0a0a0f;
+    --cell-bg: #12121a;
+    --text: #f0f0f0;
+    --gap: 3px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 16px;
+    font-family: 'Nunito', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Rainbow bar ── */
+  .rainbow-bar {
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #FF0018, #FF8A00, #FFD700, #00C853, #0066FF, #8B00FF, #FF0018);
+    background-size: 200% 100%;
+    animation: slide 3s linear infinite;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+  @keyframes slide {
+    0%   { background-position: 0%   0%; }
+    100% { background-position: 200% 0%; }
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  .title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(22px, 6.5vw, 40px);
+    letter-spacing: 2px;
+    line-height: 1.0;
+    background: linear-gradient(90deg, #FF0018, #FF8A00, #FFD700, #00C853, #0066FF, #8B00FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 100%;
+    animation: slide 3s linear infinite;
+  }
+  .subtitle {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 3px;
+    font-weight: 700;
+  }
+
+  /* ── Grid ── */
+  .grid-wrap { width: 100%; max-width: 600px; }
+
+  .bingo-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--gap);
+    background: #1e1e2e;
+    border: 2px solid #1e1e2e;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  /* Cells are taller than wide so text has room to wrap down */
+  .cell {
+    background: var(--cell-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    /* ~20% taller than square — gives wrapping room without making grid too tall */
+    aspect-ratio: 1 / 1.22;
+    padding: 4px 3px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+    overflow: hidden;
+  }
+  .cell:active { transform: scale(0.93); }
+  .cell:hover:not(.marked) { background: #1c1c2e; }
+
+  /* ── Text sizing ──
+     Base rule: font fills width generously.
+     Longer texts naturally wrap to more lines, filling height.
+     We only need a few tiers — NO tiny sizes.
+  */
+  .cell-text {
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    z-index: 1;
+    pointer-events: none;
+    word-break: break-word;
+    hyphens: auto;
+    width: 100%;
+    /* 
+      clamp(min, preferred-vw, max)
+      On a 390px phone a 5-col grid cell is ~75px wide.
+      2.8vw ≈ 10.9px at 390px — comfortable readable size.
+      Longer text wraps across more lines rather than shrinking.
+    */
+    font-size: clamp(10px, 2.75vw, 16px);
+  }
+
+  /* Only truly tiny text (9+ words) gets a nudge down */
+  .cell.f-sm .cell-text { font-size: clamp(9px, 2.3vw, 14px); }
+
+  /* Short punchy text gets a boost */
+  .cell.f-xl .cell-text { font-size: clamp(12px, 3.4vw, 20px); font-weight: 900; }
+
+  /* ── Marked state ── */
+  .cell.marked { background: #0a0a10; }
+  .cell.marked .cell-text { opacity: 0.25; }
+
+  .x-mark {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .cell.marked .x-mark { display: flex; }
+  .x-mark svg {
+    width: 60%;
+    height: 60%;
+    filter: drop-shadow(0 0 5px currentColor);
+  }
+
+  .cell.marked:nth-of-type(6n+1) .x-mark { color: var(--rainbow-1); }
+  .cell.marked:nth-of-type(6n+2) .x-mark { color: var(--rainbow-2); }
+  .cell.marked:nth-of-type(6n+3) .x-mark { color: var(--rainbow-3); }
+  .cell.marked:nth-of-type(6n+4) .x-mark { color: var(--rainbow-4); }
+  .cell.marked:nth-of-type(6n+5) .x-mark { color: var(--rainbow-5); }
+  .cell.marked:nth-of-type(6n+0) .x-mark { color: var(--rainbow-6); }
+
+  /* ── Score bar + discreet reset ── */
+  .controls {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 4px;
+  }
+  .score-bar {
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .score-bar span { color: #FFD700; }
+
+  /* Discreet text-link reset — not a big button */
+  .btn-reset {
+    background: none;
+    border: none;
+    color: #383848;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .btn-reset:hover { color: #666; }
+
+  /* ── Modals ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    padding: 20px;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: #14141f;
+    border: 2px solid #2a2a3a;
+    border-radius: 16px;
+    padding: 26px 22px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.active .modal { transform: scale(1); }
+
+  .modal-emoji { font-size: 34px; margin-bottom: 8px; }
+  .modal-question {
+    font-size: 11px;
+    color: #777;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .modal-task {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(20px, 5.5vw, 28px);
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 22px;
+    line-height: 1.2;
+  }
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .btn-yes, .btn-no, .btn-unmark {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 11px 22px;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .btn-yes {
+    background: linear-gradient(135deg, #00C853, #0066FF);
+    color: #fff;
+  }
+  .btn-yes:active { transform: scale(0.95); }
+  .btn-no {
+    background: transparent;
+    color: #666;
+    border-color: #333;
+  }
+  .btn-no:hover { color: #fff; border-color: #666; }
+  .btn-unmark {
+    background: linear-gradient(135deg, #FF0018, #FF8A00);
+    color: #fff;
+  }
+  .btn-unmark:active { transform: scale(0.95); }
+
+  /* Reset confirm */
+  .reset-modal .modal-task {
+    font-size: clamp(15px, 4vw, 19px);
+    color: #ccc;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+  }
+  .btn-confirm-reset {
+    background: linear-gradient(135deg, #FF0018, #FF8A00);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 11px 22px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .btn-confirm-reset:active { transform: scale(0.95); }
+
+  /* ── Bingo! ── */
+  .bingo-banner {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s;
+    background: rgba(0,0,0,0.6);
+  }
+  .bingo-banner.show { opacity: 1; pointer-events: all; }
+  .bingo-inner {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 20vw, 120px);
+    background: linear-gradient(90deg, #FF0018, #FF8A00, #FFD700, #00C853, #0066FF, #8B00FF);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    letter-spacing: 4px;
+    animation: slide 1s linear infinite, pulse 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.08); }
+  }
+</style>
+</head>
+<body>
+
+<div class="rainbow-bar"></div>
+
+<div class="header">
+  <div class="title">Discord Nerd Bar Crawl Bingo</div>
+  <div class="subtitle">🍺 Tap a square to mark it off 🍺</div>
+</div>
+
+<div class="grid-wrap">
+  <div class="bingo-grid" id="bingoGrid"></div>
+</div>
+
+<div class="controls">
+  <div class="score-bar">Marked: <span id="scoreCount">0</span> / 25</div>
+  <button class="btn-reset" id="resetBtn">reset all</button>
+</div>
+
+<!-- Mark modal (unmarked cell) -->
+<div class="modal-overlay" id="markModal">
+  <div class="modal">
+    <div class="modal-emoji">🎯</div>
+    <div class="modal-question">Mark this off?</div>
+    <div class="modal-task" id="modalTask"></div>
+    <div class="modal-buttons">
+      <button class="btn-no" id="modalNo">Nope</button>
+      <button class="btn-yes" id="modalYes">Done it!</button>
+    </div>
+  </div>
+</div>
+
+<!-- Unmark modal (already-marked cell) -->
+<div class="modal-overlay" id="unmarkModal">
+  <div class="modal">
+    <div class="modal-emoji">❌</div>
+    <div class="modal-question">Already marked — undo?</div>
+    <div class="modal-task" id="unmarkTask"></div>
+    <div class="modal-buttons">
+      <button class="btn-no" id="unmarkNo">Keep it</button>
+      <button class="btn-unmark" id="unmarkYes">Undo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset confirm modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal reset-modal">
+    <div class="modal-emoji">🔄</div>
+    <div class="modal-question">Reset everything?</div>
+    <div class="modal-task">This will clear all marked squares. You sure?</div>
+    <div class="modal-buttons">
+      <button class="btn-no" id="resetNo">Cancel</button>
+      <button class="btn-confirm-reset" id="resetYes">Reset!</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bingo! -->
+<div class="bingo-banner" id="bingoBanner">
+  <div class="bingo-inner">BINGO! 🏆</div>
+</div>
+
+<script>
+  // f-xl = short punchy text, f-sm = long text, default = medium
+  const CELLS = [
+    { text: "Drink 3 Long Islands",                                      cls: "f-xl" },
+    { text: "ST a fatter girl than yourself in Club Fate",               cls: "f-sm" },
+    { text: "Go behind a curtain",                                       cls: ""     },
+    { text: "ST two girls",                                              cls: "f-xl" },
+    { text: "Make a gay German joke to one of their faces",              cls: "f-sm" },
+
+    { text: "Eat a pussy out in the open",                               cls: ""     },
+    { text: "Get precum anywhere",                                       cls: ""     },
+    { text: "Make a joke about Adam",                                    cls: ""     },
+    { text: "Drink 1 beer card",                                         cls: "f-xl" },
+    { text: "Eat a slice of lasagne",                                    cls: ""     },
+
+    { text: "Get a tequila take-off",                                    cls: ""     },
+    { text: "Fuck the Goblin",                                           cls: "f-xl" },
+    { text: "Buy LD",                                                    cls: "f-xl" },
+    { text: "French Kiss Goblin after she just gave a BJ to someone else", cls: "f-sm" },
+    { text: "Puke",                                                      cls: "f-xl" },
+
+    { text: "Make a joke about an Indian",                               cls: ""     },
+    { text: "Drink 1 Bronze Sangsom card",                               cls: "f-sm" },
+    { text: "Suck a LB at Bradleys",                                     cls: ""     },
+    { text: "Finger a MILF/GILF in Cameltoe",                            cls: ""     },
+    { text: "Buy a security guard a drink",                              cls: ""     },
+
+    { text: "Get an open air BJ",                                        cls: ""     },
+    { text: "Get jerk off during either of the sexy shows",              cls: "f-sm" },
+    { text: "Play with Fat Toms nutsack",                                cls: ""     },
+    { text: "Suck a nipple",                                             cls: "f-xl" },
+    { text: "Get ferris wheel (like swampy would)",                      cls: "f-sm" },
+  ];
+
+  const LINES = [
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+    [0,6,12,18,24],[4,8,12,16,20]
+  ];
+
+  const marked     = new Array(25).fill(false);
+  let pendingIndex = null;
+  let bingoShown   = false;
+
+  const grid         = document.getElementById('bingoGrid');
+  const markModal    = document.getElementById('markModal');
+  const unmarkModal  = document.getElementById('unmarkModal');
+  const resetModal   = document.getElementById('resetModal');
+  const modalTask    = document.getElementById('modalTask');
+  const unmarkTask   = document.getElementById('unmarkTask');
+  const bingoBanner  = document.getElementById('bingoBanner');
+  const scoreCount   = document.getElementById('scoreCount');
+
+  /* Build grid */
+  CELLS.forEach(({ text, cls }, i) => {
+    const div = document.createElement('div');
+    div.className = 'cell' + (cls ? ' ' + cls : '');
+    div.innerHTML = `
+      <span class="cell-text">${text}</span>
+      <div class="x-mark">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" stroke-width="13" stroke-linecap="round"/>
+          <line x1="85" y1="15" x2="15" y2="85" stroke="currentColor" stroke-width="13" stroke-linecap="round"/>
+        </svg>
+      </div>`;
+    div.addEventListener('click', () => onCellClick(i));
+    grid.appendChild(div);
+  });
+
+  function getCells() { return grid.querySelectorAll('.cell'); }
+
+  function onCellClick(i) {
+    pendingIndex = i;
+    if (marked[i]) {
+      // Already marked — offer to undo
+      unmarkTask.textContent = CELLS[i].text;
+      unmarkModal.classList.add('active');
+    } else {
+      modalTask.textContent = CELLS[i].text;
+      markModal.classList.add('active');
+    }
+  }
+
+  /* Mark */
+  document.getElementById('modalYes').addEventListener('click', () => {
+    if (pendingIndex !== null) { markCell(pendingIndex); pendingIndex = null; }
+    markModal.classList.remove('active');
+  });
+  document.getElementById('modalNo').addEventListener('click', () => {
+    pendingIndex = null;
+    markModal.classList.remove('active');
+  });
+
+  function markCell(i) {
+    marked[i] = true;
+    getCells()[i].classList.add('marked');
+    updateScore();
+    checkBingo();
+  }
+
+  /* Unmark */
+  document.getElementById('unmarkYes').addEventListener('click', () => {
+    if (pendingIndex !== null) { unmarkCell(pendingIndex); pendingIndex = null; }
+    unmarkModal.classList.remove('active');
+  });
+  document.getElementById('unmarkNo').addEventListener('click', () => {
+    pendingIndex = null;
+    unmarkModal.classList.remove('active');
+  });
+
+  function unmarkCell(i) {
+    marked[i] = false;
+    getCells()[i].classList.remove('marked');
+    updateScore();
+    // Allow bingo to re-trigger after undo
+    bingoShown = LINES.some(line => line.every(j => marked[j]));
+  }
+
+  function updateScore() {
+    scoreCount.textContent = marked.filter(Boolean).length;
+  }
+
+  function checkBingo() {
+    if (bingoShown) return;
+    for (const line of LINES) {
+      if (line.every(i => marked[i])) {
+        bingoShown = true;
+        setTimeout(() => {
+          bingoBanner.classList.add('show');
+          setTimeout(() => bingoBanner.classList.remove('show'), 3500);
+        }, 200);
+        return;
+      }
+    }
+  }
+
+  /* Reset all */
+  document.getElementById('resetBtn').addEventListener('click', () => resetModal.classList.add('active'));
+  document.getElementById('resetYes').addEventListener('click', () => {
+    marked.fill(false);
+    bingoShown = false;
+    getCells().forEach(el => el.classList.remove('marked'));
+    updateScore();
+    resetModal.classList.remove('active');
+  });
+  document.getElementById('resetNo').addEventListener('click', () => resetModal.classList.remove('active'));
+
+  /* Backdrop close */
+  markModal.addEventListener('click',   e => { if (e.target === markModal)   { pendingIndex = null; markModal.classList.remove('active'); } });
+  unmarkModal.addEventListener('click', e => { if (e.target === unmarkModal) { pendingIndex = null; unmarkModal.classList.remove('active'); } });
+  resetModal.addEventListener('click',  e => { if (e.target === resetModal)  resetModal.classList.remove('active'); });
+  bingoBanner.addEventListener('click', () => bingoBanner.classList.remove('show'));
+</script>
+</body>
+</html>
