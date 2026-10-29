@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Discord Nerd Bar Crawl Bingo</title>
+<title>Halloween Bar Crawl Bingo</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --rainbow-1: #FF0018;
-    --rainbow-2: #FF8A00;
-    --rainbow-3: #FFD700;
-    --rainbow-4: #00C853;
-    --rainbow-5: #0066FF;
-    --rainbow-6: #8B00FF;
-    --bg: #0a0a0f;
-    --cell-bg: #12121a;
+    --rainbow-1: #FF6A00;
+    --rainbow-2: #A855F7;
+    --rainbow-3: #39FF14;
+    --rainbow-4: #FFB300;
+    --rainbow-5: #E11D48;
+    --rainbow-6: #C084FC;
+    --bg: #07050b;
+    --cell-bg: #140f1c;
     --text: #f0f0f0;
     --gap: 3px;
   }
@@ -22,7 +22,8 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
-    background: var(--bg);
+    background: radial-gradient(ellipse at top, #2a1238 0%, var(--bg) 60%) fixed, var(--bg);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,7 +36,7 @@
   .rainbow-bar {
     width: 100%;
     height: 5px;
-    background: linear-gradient(90deg, #FF0018, #FF8A00, #FFD700, #00C853, #0066FF, #8B00FF, #FF0018);
+    background: linear-gradient(90deg, #FF6A00, #A855F7, #39FF14, #FF6A00, #A855F7, #39FF14, #FF6A00);
     background-size: 200% 100%;
     animation: slide 3s linear infinite;
     border-radius: 3px;
@@ -57,13 +58,14 @@
     font-size: clamp(22px, 6.5vw, 40px);
     letter-spacing: 2px;
     line-height: 1.0;
-    background: linear-gradient(90deg, #FF0018, #FF8A00, #FFD700, #00C853, #0066FF, #8B00FF);
+    background: linear-gradient(90deg, #FF6A00, #FFB300, #A855F7, #39FF14, #A855F7, #FF6A00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     background-size: 200% 100%;
     animation: slide 3s linear infinite;
   }
+  .ttl-emoji { -webkit-text-fill-color: initial; background: none; }
   .subtitle {
     font-size: 10px;
     color: #555;
@@ -80,8 +82,9 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: var(--gap);
-    background: #1e1e2e;
-    border: 2px solid #1e1e2e;
+    background: #3a1f0a;
+    border: 2px solid #FF6A00;
+    box-shadow: 0 0 18px rgba(255,106,0,0.35);
     border-radius: 8px;
     overflow: hidden;
     width: 100%;
@@ -96,7 +99,7 @@
     text-align: center;
     /* ~20% taller than square — gives wrapping room without making grid too tall */
     aspect-ratio: 1 / 1.22;
-    padding: 4px 3px;
+    padding: 6px 3px;
     cursor: pointer;
     position: relative;
     transition: background 0.15s, transform 0.1s;
@@ -104,7 +107,7 @@
     overflow: hidden;
   }
   .cell:active { transform: scale(0.93); }
-  .cell:hover:not(.marked) { background: #1c1c2e; }
+  .cell:hover:not(.marked) { background: #22162e; }
 
   /* ── Text sizing ──
      Base rule: font fills width generously.
@@ -118,8 +121,9 @@
     line-height: 1.2;
     z-index: 1;
     pointer-events: none;
-    word-break: break-word;
-    hyphens: auto;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: manual;
     width: 100%;
     /* 
       clamp(min, preferred-vw, max)
@@ -180,7 +184,7 @@
     font-weight: 700;
     text-transform: uppercase;
   }
-  .score-bar span { color: #FFD700; }
+  .score-bar span { color: #FF6A00; }
 
   /* Discreet text-link reset — not a big button */
   .btn-reset {
@@ -216,7 +220,7 @@
 
   .modal {
     background: #14141f;
-    border: 2px solid #2a2a3a;
+    border: 2px solid #5b2a86;
     border-radius: 16px;
     padding: 26px 22px;
     max-width: 320px;
@@ -262,7 +266,7 @@
     text-transform: uppercase;
   }
   .btn-yes {
-    background: linear-gradient(135deg, #00C853, #0066FF);
+    background: linear-gradient(135deg, #FF6A00, #A855F7);
     color: #fff;
   }
   .btn-yes:active { transform: scale(0.95); }
@@ -317,7 +321,7 @@
   .bingo-inner {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(60px, 20vw, 120px);
-    background: linear-gradient(90deg, #FF0018, #FF8A00, #FFD700, #00C853, #0066FF, #8B00FF);
+    background: linear-gradient(90deg, #FF6A00, #FFB300, #A855F7, #39FF14, #A855F7, #FF6A00);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -326,6 +330,21 @@
     letter-spacing: 4px;
     animation: slide 1s linear infinite, pulse 0.5s ease-in-out infinite alternate;
   }
+  /* ── Spooky floaters ── */
+  .floaters { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .floater {
+    position: absolute;
+    font-size: 22px;
+    opacity: 0.18;
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    0%   { transform: translate(0, 0) rotate(-8deg); }
+    50%  { transform: translate(30px, -40px) rotate(8deg); }
+    100% { transform: translate(0, 0) rotate(-8deg); }
+  }
+  .rainbow-bar, .header, .grid-wrap, .controls { position: relative; z-index: 1; }
+
   @keyframes pulse {
     from { transform: scale(1); }
     to   { transform: scale(1.08); }
@@ -334,11 +353,19 @@
 </head>
 <body>
 
+<div class="floaters">
+  <span class="floater" style="top:8%;left:6%;animation-duration:9s">🦇</span>
+  <span class="floater" style="top:22%;right:8%;animation-duration:12s">🦇</span>
+  <span class="floater" style="top:55%;left:3%;animation-duration:14s">👻</span>
+  <span class="floater" style="bottom:12%;right:5%;animation-duration:11s">🕸️</span>
+  <span class="floater" style="bottom:4%;left:40%;animation-duration:10s">🎃</span>
+</div>
+
 <div class="rainbow-bar"></div>
 
 <div class="header">
-  <div class="title">Discord Nerd Bar Crawl Bingo</div>
-  <div class="subtitle">🍺 Tap a square to mark it off 🍺</div>
+  <div class="title"><span class="ttl-emoji">🎃</span> Halloween Bar Crawl Bingo <span class="ttl-emoji">🎃</span></div>
+  <div class="subtitle">🦇 Tap a square to mark it off 🦇</div>
 </div>
 
 <div class="grid-wrap">
@@ -353,7 +380,7 @@
 <!-- Mark modal (unmarked cell) -->
 <div class="modal-overlay" id="markModal">
   <div class="modal">
-    <div class="modal-emoji">🎯</div>
+    <div class="modal-emoji">👻</div>
     <div class="modal-question">Mark this off?</div>
     <div class="modal-task" id="modalTask"></div>
     <div class="modal-buttons">
@@ -366,7 +393,7 @@
 <!-- Unmark modal (already-marked cell) -->
 <div class="modal-overlay" id="unmarkModal">
   <div class="modal">
-    <div class="modal-emoji">❌</div>
+    <div class="modal-emoji">💀</div>
     <div class="modal-question">Already marked — undo?</div>
     <div class="modal-task" id="unmarkTask"></div>
     <div class="modal-buttons">
@@ -379,7 +406,7 @@
 <!-- Reset confirm modal -->
 <div class="modal-overlay" id="resetModal">
   <div class="modal reset-modal">
-    <div class="modal-emoji">🔄</div>
+    <div class="modal-emoji">⚰️</div>
     <div class="modal-question">Reset everything?</div>
     <div class="modal-task">This will clear all marked squares. You sure?</div>
     <div class="modal-buttons">
@@ -391,41 +418,41 @@
 
 <!-- Bingo! -->
 <div class="bingo-banner" id="bingoBanner">
-  <div class="bingo-inner">BINGO! 🏆</div>
+  <div class="bingo-inner">BINGO! 🎃</div>
 </div>
 
 <script>
   // f-xl = short punchy text, f-sm = long text, default = medium
   const CELLS = [
-    { text: "Get a ladies g-string",                        cls: ""     },
-    { text: "Lick Marvin's nipple",                         cls: ""     },
+    { text: "Buy a round for the whole crawl",              cls: ""     },
+    { text: "Eat a pussy out in the open",                  cls: ""     },
     { text: "Open BJ",                                      cls: "f-xl" },
-    { text: "Finger a MILF",                                cls: ""     },
-    { text: "Grab a LB willy",                              cls: ""     },
+    { text: "Finger a girl",                                cls: ""     },
+    { text: "Grab a ladyboy willy",                         cls: ""     },
 
-    { text: "Kiss Marvin",                                  cls: "f-xl" },
-    { text: "Get your willy touched",                       cls: ""     },
+    { text: "Get a lady's g\u2011string",                        cls: ""     },
+    { text: "Go behind a curtain",                          cls: ""     },
     { text: "Drink a whole beer card",                      cls: ""     },
-    { text: "Scan a bill in the bar simulator",             cls: "f-sm" },
-    { text: "Get a tequila take-off",                       cls: ""     },
+    { text: "Ring the bell",                                cls: "f-xl" },
+    { text: "Motorboat some titties",                       cls: ""     },
 
     { text: "Buy a ferris wheel",                           cls: ""     },
-    { text: "Get sweated on by Adam",                       cls: ""     },
-    { text: "Buy LD",                                       cls: "f-xl" },
-    { text: "Suck a nipple",                                cls: "f-xl" },
-    { text: "Go behind a curtain",                          cls: ""     },
+    { text: "Stay on the bar crawl until Club Fate",        cls: "f-sm" },
+    { text: "Buy a LD",                                     cls: "f-xl" },
+    { text: "Dance on a pole",                              cls: ""     },
+    { text: "Get completely naked",                         cls: ""     },
 
     { text: "Go ST",                                        cls: "f-xl" },
-    { text: "Eat a taco at Catflaps",                       cls: ""     },
-    { text: "Motorboat some titties",                       cls: ""     },
-    { text: "Drink a long island",                          cls: ""     },
-    { text: "Eat out the goblin",                           cls: ""     },
-
-    { text: "Buy a security guard a drink",                 cls: "f-sm" },
     { text: "Tip the driver",                               cls: "f-xl" },
-    { text: "Drink a pint of Guinness",                     cls: ""     },
+    { text: "Get a lady completely naked",                  cls: ""     },
+    { text: "Drink 3 Long Islands in one bar",              cls: ""     },
+    { text: "Drink a shot of pussy juice",                  cls: ""     },
+
+    { text: "Drink 2 pints of Guinness back to back",       cls: ""     },
+    { text: "Swap outfits with a lady",                     cls: ""     },
     { text: "Drink a whole spirit card",                    cls: ""     },
-    { text: "Do 2 Jagerbombs back to back",                 cls: ""     },
+    { text: "Get a tequila take\u2011off",                       cls: ""     },
+    { text: "Do 2 Jägerbombs back to back",                 cls: ""     },
   ];
 
   const LINES = [
@@ -434,7 +461,7 @@
     [0,6,12,18,24],[4,8,12,16,20]
   ];
 
-  const STORAGE_KEY = 'degen-bingo-v2-marked';
+  const STORAGE_KEY = 'degen-bingo-v3-marked';
 
   /* Load saved state from localStorage, fall back to all-false */
   let saved = [];
@@ -475,6 +502,39 @@
   });
 
   updateScore();
+
+  /* Auto-fit text, balanced across the card.
+     Pass 1 finds the biggest font each square can take without breaking
+     words. Pass 2 sets every normal square to one shared size (the 3rd
+     smallest fit, so one awkward long word can't shrink the whole card),
+     and short punchy f-xl squares get a modest 20% boost on top. */
+  function maxFit(cell, cap) {
+    const t  = cell.querySelector('.cell-text');
+    const cs = getComputedStyle(cell);
+    const h  = cell.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    let lo = 8, hi = Math.max(lo, cap);
+    while (hi - lo > 0.25) {
+      const mid = (lo + hi) / 2;
+      t.style.fontSize = mid + 'px';
+      if (t.scrollWidth <= t.clientWidth + 0.5 && t.offsetHeight <= h) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+  function fitText() {
+    const cells = [...grid.querySelectorAll('.cell')];
+    const w = cells[0].clientWidth;
+    const fits = cells.map(c => maxFit(c, w * 0.30));
+    const normal = fits.filter((f, i) => !cells[i].classList.contains('f-xl')).sort((a, b) => a - b);
+    const base = Math.min(normal[Math.min(2, normal.length - 1)], w * 0.24);
+    cells.forEach((c, i) => {
+      const target = c.classList.contains('f-xl') ? base * 1.2 : base;
+      c.querySelector('.cell-text').style.fontSize = Math.min(fits[i], target) + 'px';
+    });
+  }
+  fitText();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitText);
+  let fitTimer;
+  window.addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitText, 100); });
 
   function getCells() { return grid.querySelectorAll('.cell'); }
 
